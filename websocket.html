@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Client</title>
+</head>
+<body>
+  <h1>WebSocket Client</h1>
+  <p>Status: <span id="status">Disconnected</span></p>
+  <ul id="notifications"></ul>
+
+  <!-- Include Socket.IO client library -->
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io('http://localhost:3000'); // Use Socket.IO
+
+    const statusElem = document.getElementById('status');
+    const notificationsList = document.getElementById('notifications');
+    
+    // Handle connection open
+    socket.on('connect', () => {
+      statusElem.textContent = 'Connected';
+      // Register with phone number after connection
+      const phone = '1234567890'; // You can change this phone number
+      socket.emit('register', phone);
+    });
+
+    // Handle messages from the server
+    socket.on('notification', (message) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = message;
+      notificationsList.appendChild(listItem);
+    });
+
+    // Handle connection close
+    socket.on('disconnect', () => {
+      statusElem.textContent = 'Disconnected';
+    });
+
+    // Handle errors
+    socket.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  </script>
+</body>
+</html>
