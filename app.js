@@ -54,11 +54,19 @@ io.on('connection', (socket) => {
         AND created_at >= NOW() - INTERVAL 30 DAY 
         ORDER BY created_at ASC
       `;
+
+      // Log to verify the phone number
+      console.log(`Querying reports for phone number: ${phone}`);
+
       const [results] = await connect.query(selectQuery, [phone]);
+
+      // Log the results to debug
+      console.log(`Reports found for phone ${phone}:`, results);
 
       // If reports are found, send them to the subscriber
       if (results.length > 0) {
         results.forEach((report) => {
+          console.log(`Sending report to phone ${phone}:`, report);
           socket.emit('notification', { 
             message: report.report_data, 
             timestamp: report.created_at 
@@ -66,6 +74,7 @@ io.on('connection', (socket) => {
         });
       } else {
         // If no reports, send a welcome message
+        console.log(`No reports found for phone ${phone}, sending welcome message.`);
         socket.emit('notification', { 
           message: "Welcome to pinkapple reports app. We will send you the reports as they come in." 
         });
