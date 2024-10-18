@@ -41,9 +41,38 @@ io.on('connection', (socket) => {
   console.log('A new client connected');
 
   // Handle subscriber registration
-  socket.on('register', (phone) => {
+  socket.on('register', async (phone) => {
     console.log(`Subscriber with phone ${phone} connected`);
     subscribers[phone] = socket;
+
+    try {
+      // Fetch reports from the last 30 days
+      const selectQuery = `
+        SELECT report_data, created_at 
+        FROM reports 
+        WHERE phone = ? 
+        AND created_at >= NOW() - INTERVAL 30 DAY 
+        ORDER BY created_at ASC
+      `;
+      const [results] = await connect.query(selectQuery, [phone]);
+
+      // If reports are found, send them to the subscriber
+      if (results.length > 0) {
+        results.forEach((report) => {
+          subscribers[phone].emit('notification', { 
+            message: report.report_data, 
+            timestamp: report.created_at 
+          });
+        });
+      } else {
+        // If no reports, send a welcome message
+        subscribers[phone].emit('notification', { 
+          message: "Welcome to pinkapple reports app. We will send you the reports as they come in." 
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching reports for the subscriber:', err);
+    }
   });
 
   // Handle client disconnection
