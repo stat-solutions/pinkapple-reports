@@ -101,34 +101,25 @@ io.on('connection', (socket) => {
 });
 
 // Define an endpoint to push notifications
+a// Define an endpoint to push new notifications (only the new data is sent)
 app.post('/push-notification', async (req, res) => {
   const { phone, data } = req.body;
 
   try {
-    // Step 1: Save the report to the MySQL database
+    // Step 1: Save the new report to the MySQL database
     const insertQuery = 'INSERT INTO reports (phone, report_data, created_at) VALUES (?, ?, NOW())';
     await connect.query(insertQuery, [phone, data]);
 
-    // Step 2: Fetch reports from the last 30 days
-    const selectQuery = `
-      SELECT report_data, created_at 
-      FROM reports 
-      WHERE phone = ? 
-      AND created_at >= NOW() - INTERVAL 30 DAY 
-      ORDER BY created_at ASC
-    `;
-    const [results] = await connect.query(selectQuery, [phone]);
-
-    // Step 3: Send notification with individual reports for the last 30 days
+    // Step 2: Emit the new report to the connected subscriber
     if (subscribers[phone]) {
-      results.forEach((report) => {
-        subscribers[phone].emit('notification', { 
-          message: report.report_data, 
-          timestamp: report.created_at 
-        });
+      // Only emit the new report (just saved) to the connected subscriber
+      subscribers[phone].emit('notification', { 
+        message: data,  // Emit the new report data
+        timestamp: new Date()  // Send the current timestamp
       });
-      res.send(`Notifications sent to subscriber with phone ${phone}`);
+      res.send(`Notification sent to subscriber with phone ${phone}`);
     } else {
+      // Handle the case where the subscriber is not connected
       res.send(`Subscriber with phone ${phone} is not connected. Notification will be delivered when they reconnect.`);
     }
   } catch (err) {
@@ -136,6 +127,7 @@ app.post('/push-notification', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
 
 // Start the server
 server.listen(port, () => {
