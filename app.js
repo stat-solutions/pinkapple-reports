@@ -65,12 +65,15 @@ io.on('connection', (socket) => {
 
       // If reports are found, send them to the subscriber
       if (results.length > 0) {
-        results.forEach((report) => {
-          console.log(`Sending report to phone ${phone}:`, report);
-          socket.emit('notification', { 
-            message: report.report_data, 
-            timestamp: report.created_at 
-          });
+        const reportArray = results.map((report) => ({
+          message: report.report_data,
+          timestamp: report.created_at
+        }));
+
+        console.log(`Sending an array of reports to phone ${phone}`);
+        // Emit the array of reports at once
+        socket.emit('notification', { 
+          reports: reportArray 
         });
       } else {
         // If no reports, send a welcome message
@@ -86,6 +89,8 @@ io.on('connection', (socket) => {
       });
     }
   });
+
+
 
   // Handle client disconnection
   socket.on('disconnect', () => {
