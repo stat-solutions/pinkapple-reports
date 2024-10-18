@@ -1,3 +1,5 @@
+require('dotenv').config(); // Load environment variables from .env
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -16,7 +18,7 @@ const io = socketIo(server, {
 // Enable CORS for all requests
 app.use(cors());
 
-const port = 3000;
+const port = process.env.PORT || 3000; // Read the port from the .env file or fallback to 3000
 
 // Store connections for subscribers
 const subscribers = {};
@@ -71,11 +73,15 @@ app.post('/push-notification', async (req, res) => {
     `;
     const [results] = await connect.query(selectQuery, [phone]);
 
-    // Step 3: Send notification with the most recent report
+    // Step 3: Send notification with individual reports for the last 30 days
     if (subscribers[phone]) {
-      const reportList = results.map(r => r.report_data);
-      subscribers[phone].emit('notification', reportList);
-      res.send(`Notification sent to subscriber with phone ${phone}`);
+      results.forEach((report) => {
+        subscribers[phone].emit('notification', { 
+          message: report.report_data, 
+          timestamp: report.created_at 
+        });
+      });
+      res.send(`Notifications sent to subscriber with phone ${phone}`);
     } else {
       if (!pendingMessages[phone]) {
         pendingMessages[phone] = [];
