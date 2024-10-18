@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
   // Handle subscriber registration
   socket.on('register', async (phone) => {
     console.log(`Subscriber with phone ${phone} connected`);
-    subscribers[phone] = socket;
+    subscribers[phone] = socket; // Store the socket connection
 
     try {
       // Fetch reports from the last 30 days
@@ -59,19 +59,22 @@ io.on('connection', (socket) => {
       // If reports are found, send them to the subscriber
       if (results.length > 0) {
         results.forEach((report) => {
-          subscribers[phone].emit('notification', { 
+          socket.emit('notification', { 
             message: report.report_data, 
             timestamp: report.created_at 
           });
         });
       } else {
         // If no reports, send a welcome message
-        subscribers[phone].emit('notification', { 
+        socket.emit('notification', { 
           message: "Welcome to pinkapple reports app. We will send you the reports as they come in." 
         });
       }
     } catch (err) {
       console.error('Error fetching reports for the subscriber:', err);
+      socket.emit('notification', { 
+        message: "An error occurred while fetching your reports. Please try again later." 
+      });
     }
   });
 
@@ -95,7 +98,7 @@ app.post('/push-notification', async (req, res) => {
   try {
     // Step 1: Save the report to the MySQL database
     const insertQuery = 'INSERT INTO reports (phone, report_data, created_at) VALUES (?, ?, NOW())';
-    await connect.query(insertQuery, [phone, data]); // Use connect instead of db
+    await connect.query(insertQuery, [phone, data]);
 
     // Step 2: Fetch reports from the last 30 days
     const selectQuery = `
