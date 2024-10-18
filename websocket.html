@@ -10,36 +10,41 @@
   <p>Status: <span id="status">Disconnected</span></p>
   <ul id="notifications"></ul>
 
-  <!-- Include Socket.IO client library -->
+  <!-- Include Socket.IO client library from Heroku -->
   <script src="https://pinkapple-reports-834b63200c6b.herokuapp.com/socket.io/socket.io.js"></script>
 
   <script>
-    const socket = io('https://pinkapple-reports-834b63200c6b.herokuapp.com'); // Use Socket.IO
-
     const statusElem = document.getElementById('status');
     const notificationsList = document.getElementById('notifications');
     
+    // Initialize the socket connection to the Heroku server
+    const socket = io('https://pinkapple-reports-834b63200c6b.herokuapp.com'); // WebSocket over HTTPS (wss)
+
     // Handle connection open
     socket.on('connect', () => {
+      console.log('Connected to WebSocket');
       statusElem.textContent = 'Connected';
+
       // Register with phone number after connection
-      const phone = '1234567890'; // You can change this phone number
+      const phone = '1234567890'; // You can change this phone number dynamically
       socket.emit('register', phone);
     });
 
-    // Handle messages from the server
+    // Handle incoming notifications from the server
     socket.on('notification', (message) => {
+      console.log('Notification received:', message);
       const listItem = document.createElement('li');
-      listItem.textContent = message;
+      listItem.textContent = `Message: ${message.message} | Time: ${new Date(message.timestamp).toLocaleString()}`;
       notificationsList.appendChild(listItem);
     });
 
     // Handle connection close
     socket.on('disconnect', () => {
+      console.log('Disconnected from WebSocket');
       statusElem.textContent = 'Disconnected';
     });
 
-    // Handle errors
+    // Handle WebSocket errors
     socket.on('error', (error) => {
       console.error('WebSocket error:', error);
     });

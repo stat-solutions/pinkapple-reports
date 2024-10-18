@@ -8,17 +8,19 @@ const { connect } = require('./dbConnector'); // Import the MySQL connection poo
 
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Socket.IO and configure CORS
 const io = socketIo(server, {
   cors: {
-    origin: "*",
+    origin: "*",  // Allow all origins; replace with specific domains if needed
     methods: ["GET", "POST"]
   }
 });
 
-// Enable CORS for all requests
+// Enable CORS globally for the Express app
 app.use(cors());
 
-const port = process.env.PORT || 3000; // Read the port from the .env file or fallback to 3000
+const port = process.env.PORT || 3000; // Read port from .env or use 3000
 
 // Store connections for subscribers
 const subscribers = {};
@@ -30,6 +32,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('Welcome to the Notification System');
 });
+
+// Serve static files if necessary (make sure to put your client HTML in a public folder)
+app.use(express.static('public'));
 
 // Handle Socket.IO connections
 io.on('connection', (socket) => {
@@ -83,10 +88,6 @@ app.post('/push-notification', async (req, res) => {
       });
       res.send(`Notifications sent to subscriber with phone ${phone}`);
     } else {
-      if (!pendingMessages[phone]) {
-        pendingMessages[phone] = [];
-      }
-      pendingMessages[phone].push(data);
       res.send(`Subscriber with phone ${phone} is not connected. Notification will be delivered when they reconnect.`);
     }
   } catch (err) {
