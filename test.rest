@@ -15,7 +15,7 @@ POST  https://pinkapple-reports-834b63200c6b.herokuapp.com/push-notification
 Content-Type: application/json
 
 {
-  "phone": "0781331616",
+  "phone": "1234567890",
   "data": "Dear Edie TESTING COMPANY BRANCH END OF DAY REPORT on 23/09/2024:No.OfActiveLoans: 675;No.OfCustomersPaid: 317;CollectionRate: 47%;NewCustomers: 3;TotalCollections: 7,579,400;No.OfRenewedPaid: 19;TotalAmntRenewedPaid: 342,000;No.OfLoansDisbursed: 23;TotalAmntDisbursed: 6,550,000;No.OfLoansRenewed: 7;TotalAmntRenewed: 1,967,500;PrincipalBalance: 130,713,014;InterestBalance: 21,684,657;TotalLoanPortfolio: 152,397,671;No.OfSavingAdded: 11;No.OfSavingRemoved: 9;OpeningCash: 825,800;PrincipalCollected: 6,368,355;InterestCollected: 1,211,045;ProcessingFees: 335,000;LedgerFees: 30,000;UnrealisedInterestIncome: 207,628;SavingsAndDeposits: 129,200;BankDeposits: 1,189,000;TotalExpenses: 135,000;LoanDisbursements: 6,550,000;SavingsWithdraws: 216,200;ClosingCash: 809,200;"
 }
 
