@@ -100,8 +100,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Define an endpoint to push notifications
-a// Define an endpoint to push new notifications (only the new data is sent)
+
+// Define an endpoint to push new notifications (only the new data is sent)
 app.post('/push-notification', async (req, res) => {
   const { phone, data } = req.body;
 
