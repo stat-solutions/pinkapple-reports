@@ -46,12 +46,12 @@ io.on('connection', (socket) => {
     subscribers[phone] = socket; // Store the socket connection
 
     try {
-      // Fetch reports from the last 30 days
+      // Fetch reports from the last 30 days in UTC format
       const selectQuery = `
-        SELECT report_data, created_at 
+        SELECT report_data, CONVERT_TZ(created_at, @@session.time_zone, '+00:00') AS created_at 
         FROM reports 
         WHERE phone = ? 
-        AND created_at >= NOW() - INTERVAL 30 DAY 
+        AND created_at >= UTC_TIMESTAMP() - INTERVAL 30 DAY 
         ORDER BY created_at ASC
       `;
 
@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
       if (results.length > 0) {
         const reportArray = results.map((report) => ({
           message: report.report_data,
-          timestamp: report.created_at
+          timestamp: report.created_at // Already in UTC ISO 8601 format
         }));
 
         console.log(`Sending an array of reports to phone ${phone}`);
@@ -90,8 +90,6 @@ io.on('connection', (socket) => {
     }
   });
 
-
-
   // Handle client disconnection
   socket.on('disconnect', () => {
     console.log('Client disconnected');
@@ -105,14 +103,13 @@ io.on('connection', (socket) => {
   });
 });
 
-
 // Define an endpoint to push new notifications (only the new data is sent)
 app.post('/push-notification', async (req, res) => {
   const { phone, data } = req.body;
 
   try {
-    // Step 1: Save the new report to the MySQL database
-    const insertQuery = 'INSERT INTO reports (phone, report_data, created_at) VALUES (?, ?, NOW())';
+    // Step 1: Save the new report to the MySQL database with UTC timestamp
+    const insertQuery = 'INSERT INTO reports (phone, report_data, created_at) VALUES (?, ?, UTC_TIMESTAMP())';
     await connect.query(insertQuery, [phone, data]);
 
     // Step 2: Emit the new report to the connected subscriber
@@ -120,7 +117,7 @@ app.post('/push-notification', async (req, res) => {
       // Only emit the new report (just saved) to the connected subscriber
       subscribers[phone].emit('notification', { 
         message: data,  // Emit the new report data
-        timestamp: new Date()  // Send the current timestamp
+        timestamp: new Date().toISOString()  // Send the current UTC timestamp
       });
       res.send(`Notification sent to subscriber with phone ${phone}`);
     } else {
@@ -132,7 +129,6 @@ app.post('/push-notification', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 
 // Start the server
 server.listen(port, () => {

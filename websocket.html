@@ -10,8 +10,7 @@
   <p>Status: <span id="status">Disconnected</span></p>
   <ul id="notifications"></ul>
 
-  <!-- Include Socket.IO client library from Heroku -->
-  <!-- <script src="https://pinkapple-reports-834b63200c6b.herokuapp.com/socket.io/socket.io.js"></script> -->
+  <!-- Include Socket.IO client library -->
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 
   <script>
@@ -34,9 +33,21 @@
     // Handle incoming notifications from the server
     socket.on('notification', (message) => {
       console.log('Notification received:', message);
-      const listItem = document.createElement('li');
-      listItem.textContent = `Message: ${message.message} | Time: ${new Date(message.timestamp).toLocaleString()}`;
-      notificationsList.appendChild(listItem);
+
+      // Check if the message contains an array of reports (initial batch)
+      if (message.reports && Array.isArray(message.reports)) {
+        // Handle the array of reports
+        message.reports.forEach(report => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `Message: ${report.message} | Time: ${new Date(report.timestamp).toLocaleString()}`;
+          notificationsList.appendChild(listItem);
+        });
+      } else {
+        // Handle individual report messages
+        const listItem = document.createElement('li');
+        listItem.textContent = `Message: ${message.message} | Time: ${new Date(message.timestamp).toLocaleString()}`;
+        notificationsList.appendChild(listItem);
+      }
     });
 
     // Handle connection close
