@@ -165,7 +165,7 @@ app.post("/send-notification", async (req, res) => {
       title: title, 
       body: body ,
     },
-    topic: target, 
+    topic: 'reports', 
   };
 
   try {
