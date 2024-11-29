@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
         SELECT report_data, CONVERT_TZ(created_at, @@session.time_zone, '+00:00') AS created_at 
         FROM reports 
         WHERE phone = ? 
-        AND created_at >= UTC_TIMESTAMP() - INTERVAL 7 DAY 
+        AND created_at >= UTC_TIMESTAMP() - INTERVAL 2 DAY 
         ORDER BY created_at ASC
       `;
 
