@@ -21,10 +21,15 @@ Content-Type: application/json
 
 
 ### Test sending notification to a disconnected subscriber (message will be queued)
-POST http://localhost:3000/push-notification
+POST http://localhost:3090/push-notification
 Content-Type: application/json
 
 {
   "phone": "0987654321",
   "data": "Please review your latest updates."
 }
+
+### Search Reports by Phone and Date
+GET http://localhost:3090/reports/search?phone=0781698950&date=2024-11-28
+Content-Type: application/json
+

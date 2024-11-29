@@ -18,7 +18,7 @@
     const notificationsList = document.getElementById('notifications');
     
     // Initialize the socket connection to the Heroku server
-    const socket = io('http://localhost:3090'); // WebSocket over HTTPS (wss)
+    const socket = io('https://pinkapple-reports-834b63200c6b.herokuapp.com'); // WebSocket over HTTPS (wss)
 
     // Handle connection open
     socket.on('connect', () => {

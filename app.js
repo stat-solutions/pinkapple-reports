@@ -103,6 +103,56 @@ io.on('connection', (socket) => {
   });
 });
 
+app.get('/reports/search', async (req, res) => {
+  const { phone, date } = req.query; // Expect phone and a specific date in query parameters
+
+  // Validate inputs
+  if (!phone || !date) {
+    return res.status(400).json({ message: 'Phone number and date are required.' });
+  }
+
+  const connection = await connect.getConnection();
+
+  try {
+    // Simplify query to match a specific date
+    const query = `
+      SELECT 
+        report_data, 
+        CONVERT_TZ(created_at, @@session.time_zone, '+00:00') AS created_at 
+      FROM 
+        reports 
+      WHERE 
+        phone = ? 
+        AND DATE(created_at) = ? 
+      ORDER BY 
+        created_at ASC
+    `;
+
+    console.log('Executing query:', query);
+    console.log('With parameters:', [phone, date]);
+
+    // Execute query with phone and date
+    const [results] = await connection.query(query, [phone, date]);
+
+    if (results.length > 0) {
+      const reports = results.map((report) => ({
+        message: report.report_data,
+        timestamp: report.created_at, // Full timestamp in UTC for reference
+      }));
+
+      return res.status(200).json({ reports });
+    } else {
+      return res.status(404).json({ message: 'No reports found for the given phone number and date.' });
+    }
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    return res.status(500).json({ message: 'An error occurred while fetching the reports.' });
+  } finally {
+    connection.release();
+  }
+});
+
+
 // Define an endpoint to push new notifications (only the new data is sent)
 app.post('/push-notification', async (req, res) => {
   const { phone, data } = req.body;
