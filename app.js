@@ -9,6 +9,10 @@ const { connect } = require('./dbConnector'); // Import the MySQL connection poo
 const app = express();
 const server = http.createServer(app);
 
+
+//firebase
+const admin = require("./firebase");
+
 // Initialize Socket.IO and configure CORS
 const io = socketIo(server, {
   cors: {
@@ -177,6 +181,48 @@ app.post('/push-notification', async (req, res) => {
   } catch (err) {
     console.error('Error handling push notification:', err);
     res.status(500).send('Server error');
+  }
+});
+
+
+//notifications
+
+const sendNotification = async ({ title, body, target }) => {
+  // Construct the message payload for FCM
+  const message = {
+    notification: {
+      title,
+      body,
+    },
+    topic: target, // Assuming `target` is the topic name
+  };
+
+  // Send the message using Firebase Admin SDK
+  try {
+    const response = await admin.messaging().send(message);
+    console.log("Notification sent to topic:", response, target);
+    return { success: true, response };
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    return { success: false, error };
+  }
+};
+
+app.post("/send-notification", async (req, res) => {
+  const { title, body, target } = req.body;
+
+  if (!title || !body || !target) {
+    return res
+      .status(400)
+      .send({ message: "Missing required fields: title, body, or target." });
+  }
+
+  const result = await sendNotification({ title, body, target });
+
+  if (result.success) {
+    res.status(200).send({ message: `Notification sent to ${target}` });
+  } else {
+    res.status(500).send({ message: "Failed to send notification." });
   }
 });
 
