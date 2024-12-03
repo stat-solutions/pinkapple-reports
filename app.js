@@ -107,6 +107,8 @@ io.on('connection', (socket) => {
 });
 
 // Define an endpoint to push new notifications (only the new data is sent)
+
+// Define an endpoint to push new notifications (only the new data is sent)
 app.post('/push-notification', async (req, res) => {
   const { phone, data } = req.body;
 
@@ -122,23 +124,6 @@ app.post('/push-notification', async (req, res) => {
         message: data,  // Emit the new report data
         timestamp: new Date().toISOString()  // Send the current UTC timestamp
       });
-      
-      try {
-        
-        // Send the message user
-        const message = {
-          notification: {
-            title: "New Report",
-            body: "daily report has arrived",
-          },
-          topic: phone,
-        };
-        const response = await admin.messaging().send(message);
-        console.log("Notification sent to topic:", response, phone);
-       } catch (error) {
-        console.error("Error sending notification:", error);
-      }
-      
       res.send(`Notification sent to subscriber with phone ${phone}`);
     } else {
       // Handle the case where the subscriber is not connected
