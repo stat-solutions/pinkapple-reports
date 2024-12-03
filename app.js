@@ -187,26 +187,26 @@ app.post('/push-notification', async (req, res) => {
 
 //notifications
 
-const sendNotification = async ({ title, body, target }) => {
-  // Construct the message payload for FCM
-  const message = {
-    notification: {
-      title,
-      body,
-    },
-    topic: target, // Assuming `target` is the topic name
-  };
+// const sendNotification = async ({ title, body, target }) => {
+//   // Construct the message payload for FCM
+//   const message = {
+//     notification: {
+//       title,
+//       body,
+//     },
+//     topic: target, // Assuming `target` is the topic name
+//   };
 
-  // Send the message using Firebase Admin SDK
-  try {
-    const response = await admin.messaging().send(message);
-    console.log("Notification sent to topic:", response, target);
-    return { success: true, response };
-  } catch (error) {
-    console.error("Error sending notification:", error);
-    return { success: false, error };
-  }
-};
+//   // Send the message using Firebase Admin SDK
+//   try {
+//     const response = await admin.messaging().send(message);
+//     console.log("Notification sent to topic:", response, target);
+//     return { success: true, response };
+//   } catch (error) {
+//     console.error("Error sending notification:", error);
+//     return { success: false, error };
+//   }
+// };
 
 // app.post("/send-notification", async (req, res) => {
 //   const { title, body, target } = req.body;
