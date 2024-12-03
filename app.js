@@ -208,23 +208,23 @@ const sendNotification = async ({ title, body, target }) => {
   }
 };
 
-app.post("/send-notification", async (req, res) => {
-  const { title, body, target } = req.body;
+// app.post("/send-notification", async (req, res) => {
+//   const { title, body, target } = req.body;
 
-  if (!title || !body || !target) {
-    return res
-      .status(400)
-      .send({ message: "Missing required fields: title, body, or target." });
-  }
+//   if (!title || !body || !target) {
+//     return res
+//       .status(400)
+//       .send({ message: "Missing required fields: title, body, or target." });
+//   }
 
-  const result = await sendNotification({ title, body, target });
+//   const result = await sendNotification({ title, body, target });
 
-  if (result.success) {
-    res.status(200).send({ message: `Notification sent to ${target}` });
-  } else {
-    res.status(500).send({ message: "Failed to send notification." });
-  }
-});
+//   if (result.success) {
+//     res.status(200).send({ message: `Notification sent to ${target}` });
+//   } else {
+//     res.status(500).send({ message: "Failed to send notification." });
+//   }
+// });
 
 // Start the server
 server.listen(port, () => {
